@@ -10,7 +10,8 @@ import com.eyeball.utils.misc.Utils;
 
 /**
  * 
- * A class with reflection related things such as invoking methods, getting fields and more.
+ * A class with reflection related things such as invoking methods, getting
+ * fields and more.
  * 
  * @author Eyeball
  * 
@@ -99,8 +100,8 @@ public class ReflectionHelper {
 	 *            The Annotation type.
 	 * @return The annotation, or null if it does not exist.
 	 */
-	public static <A extends Annotation> A getAnnotationWithType(
-			Method method, Class<A> type) {
+	public static <A extends Annotation> A getAnnotationWithType(Method method,
+			Class<A> type) {
 		A anno = method.getAnnotation(type);
 		return anno;
 	}
@@ -122,48 +123,84 @@ public class ReflectionHelper {
 
 	/**
 	 * 
-	 * Gets a field from a specified class.
+	 * Gets a specified field from a class.
 	 * 
-	 * @param className
-	 *            The name of the class, with the package.
-	 * @param fieldToGet
-	 *            The name of the field.
+	 * @param classToAccess
+	 *            The class.
 	 * @param instance
-	 *            The instance to get the field from. May be null if it is a
-	 *            static field, otherwise a NullPointerException will be thrown
+	 *            The class instance, or null if the field is static.
+	 * @param fieldName
+	 *            The name of the field.
 	 * @return The field.
+	 * @throws NoSuchFieldException
+	 *             If the field could not be found anywhere in the class.
+	 * @throws SecurityException
+	 *             If the security manager denies access to the
+	 *             {@link Field#setAccessible(boolean)} method.
+	 * @throws IllegalAccessException
+	 *             If the field is private and
+	 *             {@link Field#setAccessible(boolean)} somehow did not allow
+	 *             reading. This could be due to a security manager.
+	 */
+	@SuppressWarnings("unchecked")
+	public static <T, E> T getField(Class<? super E> classToAccess, E instance,
+			String fieldName) throws NoSuchFieldException, SecurityException,
+			IllegalAccessException {
+		Field field = classToAccess.getDeclaredField(fieldName);
+		field.setAccessible(true);
+		return (T) field.get(instance);
+	}
+
+	/**
+	 * 
+	 * Sets a field to a specified value.
+	 * 
+	 * @param classToAccess
+	 *            The class to access.
+	 * @param instance
+	 *            The instance.
+	 * @param fieldName
+	 *            The field name.
+	 * @param newField
+	 *            The value of the new field.
 	 * @throws NoSuchFieldException
 	 *             If the field does not exist.
 	 * @throws SecurityException
-	 *             If reading of the field is not allowed by the security
-	 *             manager.
-	 * @throws ClassNotFoundException
-	 *             If the class cannot be found.
+	 *             If the security manager denies access to the
+	 *             {@link Field#setAccessible(boolean)} method.
 	 * @throws IllegalArgumentException
-	 *             If instance is not the same as the class in className.
+	 *             If newField is not the same type as the underlying field.
 	 * @throws IllegalAccessException
-	 *             Should not happen.
-	 * @throws NullPointerException
-	 *             If the field is non-static and instance is null.
-	 * 
-	 * @throws ClassCastException If the field type and type is not the same.
-	 * 
-	 * @author Eyeball
+	 *             If the security manager denies access from reading the field.
 	 */
-	public static <A extends Object> A getField(String className,
-			String fieldToGet, Object instance, Class<A> type)
-			throws NoSuchFieldException, SecurityException,
-			ClassNotFoundException, IllegalArgumentException,
-			IllegalAccessException, NullPointerException, ClassCastException {
-		Class<?> clazz = ReflectionHelper.getClass(className);
-		Field field = clazz.getDeclaredField(fieldToGet);
+	public static <E> void setField(Class<? super E> classToAccess, E instance,
+			String fieldName, Object newField) throws NoSuchFieldException,
+			SecurityException, IllegalArgumentException, IllegalAccessException {
+		Field field = classToAccess.getDeclaredField(fieldName);
 		field.setAccessible(true);
-		Object returnType = field.get(instance);
+		field.set(instance, newField);
 
-		@SuppressWarnings("unchecked")
-		A tReturn = (A) returnType;
+	}
 
-		return tReturn;
+	/**
+	 * 
+	 * Sets a field to a specified value.
+	 * 
+	 * @param instance
+	 *            The instance.
+	 * @param field
+	 *            The field.
+	 * @param newField
+	 *            The value of the new field.
+	 * @throws IllegalArgumentException
+	 *             If newField is not the same type as the underlying field.
+	 * @throws IllegalAccessException
+	 *             If the security manager denies access from reading the field.
+	 */
+	public static <E> void setField(E instance, Field field, Object newField)
+			throws IllegalArgumentException, IllegalAccessException {
+		field.setAccessible(true);
+		field.set(instance, newField);
 	}
 
 	/**

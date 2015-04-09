@@ -13,8 +13,7 @@ public class Main {
 			NullPointerException {
 		// How to print? Everything is private.
 		// Use ReflectionHelper!
-		LOGGER = ReflectionHelper.getField(References.class.getName(),
-				"LOGGER", /* static */null, MultiLogger.class);
+		LOGGER = ReflectionHelper.getField(References.class, /* static */null, "LOGGER");
 		LOGGER.info("Hi?");
 		LOGGER.info("Yes! this worked!");
 	}
