@@ -6,6 +6,7 @@ import java.io.IOException;
 import com.eyeball.utils.io.FileTextList;
 import com.eyeball.utils.logging.Logger;
 import com.eyeball.utils.logging.MultiLogger;
+import com.eyeball.utils.misc.Translator;
 import com.eyeball.utils.reflect.ReflectionHelper;
 
 public class Main {
@@ -28,12 +29,10 @@ public class Main {
 			new Logger("File-Reader").info(s);
 		}
 
-		// How to print? Everything is private.
-		// Use ReflectionHelper!
-		LOGGER = ReflectionHelper.getField(References.class, /* static */null,
-				"LOGGER");
-		LOGGER.info("Hi?");
-		LOGGER.info("Yes! this worked!");
-	}
+		Translator t = new Translator(new File(System.getProperty("user.home")
+				+ "/options.txt"));
 
+		LOGGER.info(t.translate("motd.message"));
+		LOGGER.info(t.translate("warning.nofile"));
+	}
 }

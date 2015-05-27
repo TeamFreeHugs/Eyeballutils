@@ -11,7 +11,6 @@ import java.io.Reader;
 import java.util.ArrayList;
 
 import com.eyeball.utils.annotation.Private;
-import com.eyeball.utils.logging.Logger;
 
 /**
  * 
@@ -21,8 +20,6 @@ import com.eyeball.utils.logging.Logger;
  * 
  */
 public class OptionsReader implements IOptionsReader {
-
-	static Logger LOGGER = new Logger("Options-Reader");
 
 	private String path;
 
@@ -37,12 +34,9 @@ public class OptionsReader implements IOptionsReader {
 	public OptionsReader(File fileToRead) throws IOException {
 		path = fileToRead.getCanonicalPath();
 		if (!fileToRead.exists()) {
-			LOGGER.info("File: " + fileToRead.getName() + " does not exist!");
-			LOGGER.info("Generating it!");
 			FileWriter fw = new FileWriter(fileToRead);
 			fw.close();
-		} else
-			LOGGER.info("Found options file " + fileToRead.getName() + "!");
+		}
 	}
 
 	/**
@@ -58,55 +52,45 @@ public class OptionsReader implements IOptionsReader {
 		path = fileToRead;
 		File file = new File(fileToRead);
 		if (!file.exists()) {
-			LOGGER.info("File: " + file.getName() + " does not exist!");
-			LOGGER.info("Generating it!");
 			FileWriter fw = new FileWriter(fileToRead);
 			fw.close();
-		} else
-			LOGGER.info("Found options file " + file.getName() + "!");
-
+		}
 	}
 
 	/**
 	 * Puts a coment into the file
 	 * 
 	 * @param text
+	 * @throws IOException
 	 */
 
 	@Override
-	public void comment(String text) {
+	public void comment(String text) throws IOException {
 		String write = "# " + text;
-		LOGGER.info("I need " + write);
 		String[] stuff = read();
 		for (String c : stuff) {
 			if (c.contains("#"))
-				LOGGER.info(c);
-			if (write.equals(c))
-				break;
-			else {
-				write(write);
-				break;
-			}
+				if (write.equals(c))
+					break;
+				else {
+					write(write);
+					break;
+				}
 		}
 	}
 
 	@Private(reason = "My Stuff!")
-	public String[] read() {
-		try {
-			FileInputStream is;
-			is = new FileInputStream(path);
-			StringBuilder sb = new StringBuilder(2048);
-			Reader r = new InputStreamReader(is, "UTF-8");
-			int c = 0;
-			while ((c = r.read()) != -1)
-				sb.append((char) c);
-			r.close();
-			String text = sb.toString();
-			return text.split("\\r?\\n");
-		} catch (Exception e1) {
-			LOGGER.error("Exception caught while reading options file!");
-		}
-		return new String[] {};
+	public String[] read() throws IOException {
+		FileInputStream is;
+		is = new FileInputStream(path);
+		StringBuilder sb = new StringBuilder(2048);
+		Reader r = new InputStreamReader(is, "UTF-8");
+		int c = 0;
+		while ((c = r.read()) != -1)
+			sb.append((char) c);
+		r.close();
+		String text = sb.toString();
+		return text.split("\\r?\\n");
 	}
 
 	/**
@@ -114,19 +98,17 @@ public class OptionsReader implements IOptionsReader {
 	 * @param varName
 	 *            The name of the option
 	 * @return The boolean read
+	 * @throws IOException
 	 */
 	@Override
-	public boolean readBoolean(String varName, boolean defaultANS) {
-		try {
-			String[] options = read();
-			for (String c : options)
-				if (c.trim().startsWith(varName))
-					return Boolean.parseBoolean(c.trim().substring(
-							varName.length() + 1));
-			write(varName + "=" + defaultANS);
-		} catch (Exception e) {
-			return false;
-		}
+	public boolean readBoolean(String varName, boolean defaultANS)
+			throws IOException {
+		String[] options = read();
+		for (String c : options)
+			if (c.trim().startsWith(varName))
+				return Boolean.parseBoolean(c.trim().substring(
+						varName.length() + 1));
+		write(varName + "=" + defaultANS);
 		return defaultANS;
 	}
 
@@ -135,19 +117,16 @@ public class OptionsReader implements IOptionsReader {
 	 * @param varName
 	 *            The name of the option
 	 * @return The float read
+	 * @throws IOException
 	 */
 	@Override
-	public float readFloat(String varName, float defaultANS) {
-		try {
-			String[] options = read();
-			for (String c : options)
-				if (c.trim().startsWith(varName))
-					return Float.parseFloat(c.trim().substring(
-							varName.length() + 1));
-			write(varName + "=" + defaultANS);
-		} catch (Exception e) {
-			return 0.0F;
-		}
+	public float readFloat(String varName, float defaultANS) throws IOException {
+		String[] options = read();
+		for (String c : options)
+			if (c.trim().startsWith(varName))
+				return Float.parseFloat(c.trim()
+						.substring(varName.length() + 1));
+		write(varName + "=" + defaultANS);
 		return defaultANS;
 	}
 
@@ -156,19 +135,16 @@ public class OptionsReader implements IOptionsReader {
 	 * @param varName
 	 *            The name of the option
 	 * @return The int read
+	 * @throws IOException
 	 */
 	@Override
-	public int readInt(String varName, int defaultANS) {
-		try {
-			String[] options = read();
-			for (String c : options)
-				if (c.trim().startsWith(varName))
-					return Integer.parseInt(c.trim().substring(
-							varName.length() + 1));
-			write(varName + "=" + defaultANS);
-		} catch (Exception e) {
-			return 0;
-		}
+	public int readInt(String varName, int defaultANS) throws IOException {
+		String[] options = read();
+		for (String c : options)
+			if (c.trim().startsWith(varName))
+				return Integer.parseInt(c.trim()
+						.substring(varName.length() + 1));
+		write(varName + "=" + defaultANS);
 		return defaultANS;
 	}
 
@@ -177,19 +153,15 @@ public class OptionsReader implements IOptionsReader {
 	 * @param varName
 	 *            The name of the option
 	 * @return The long read
+	 * @throws IOException
 	 */
 	@Override
-	public long readLong(String varName, long defaultANS) {
-		try {
-			String[] options = read();
-			for (String c : options)
-				if (c.trim().startsWith(varName))
-					return Long.parseLong(c.trim().substring(
-							varName.length() + 1));
-			write(varName + "=" + defaultANS);
-		} catch (Exception e) {
-			return 0;
-		}
+	public long readLong(String varName, long defaultANS) throws IOException {
+		String[] options = read();
+		for (String c : options)
+			if (c.trim().startsWith(varName))
+				return Long.parseLong(c.trim().substring(varName.length() + 1));
+		write(varName + "=" + defaultANS);
 		return defaultANS;
 	}
 
@@ -198,18 +170,16 @@ public class OptionsReader implements IOptionsReader {
 	 * @param varName
 	 *            The name of the option
 	 * @return The String read
+	 * @throws IOException
 	 */
 	@Override
-	public String readString(String varName, String defaultANS) {
-		try {
-			String[] options = read();
-			for (String c : options)
-				if (c.trim().startsWith(varName))
-					return c.trim().substring(varName.length() + 1);
-			write(varName + "=" + defaultANS);
-		} catch (Exception e) {
-			return "";
-		}
+	public String readString(String varName, String defaultANS)
+			throws IOException {
+		String[] options = read();
+		for (String c : options)
+			if (c.trim().startsWith(varName))
+				return c.trim().substring(varName.length() + 1);
+		write(varName + "=" + defaultANS);
 		return defaultANS;
 	}
 
@@ -254,17 +224,13 @@ public class OptionsReader implements IOptionsReader {
 	 * 
 	 * @param text
 	 *            The text to be written.
+	 * @throws IOException
 	 */
 	@Private(reason = "My Stuff!")
-	public void write(String text) {
-		try {
-			PrintWriter out = new PrintWriter(new FileWriter(new File(path),
-					true));
-			out.println(text);
-			out.close();
-		} catch (IOException e) {
-			LOGGER.error("Exception caught while writing to options file!");
-		}
+	public void write(String text) throws IOException {
+		PrintWriter out = new PrintWriter(new FileWriter(new File(path), true));
+		out.println(text);
+		out.close();
 	}
 
 	/**
@@ -273,9 +239,11 @@ public class OptionsReader implements IOptionsReader {
 	 *            The array to write
 	 * @param name
 	 *            Writes the given array to file;
+	 * @throws IOException
 	 */
 	@Private(reason = "My Stuff!")
-	public void writeArray(ArrayList<?> arrayToWrite, String name) {
+	public void writeArray(ArrayList<?> arrayToWrite, String name)
+			throws IOException {
 		write(name + "=\"");
 		Object[] stuff = arrayToWrite.toArray();
 		for (Object current : stuff)
